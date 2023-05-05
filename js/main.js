@@ -1,6 +1,12 @@
 
 const form = document.getElementById('novoItem');
 const lista = document.getElementById("lista");
+const itens = JSON.parse(localStorage.getItem("itens")) || [];
+//se tiver algum item, ele vai até o dado armazenado e pega e joga para página ou vai criar um array vazio;
+
+itens.forEach( (elemento) => {
+    console.log(elemento.nome, elemento.quantidade);
+})
 
 form.addEventListener("submit", (evento) => {
     evento.preventDefault();
@@ -35,9 +41,19 @@ function criaElemento(nome, quantidade){
 
     lista.appendChild(novoItem);
 
-    localStorage.setItem("nome", nome);
-    localStorage.setItem("quantidade", quantidade);
-    //armazenar os dados recebidos no navegador para quando atualizar esses dados continuarem lá
+    const itemAtual = {
+        "nome": nome,
+        "quantidade": quantidade
+    }
+
+    itens.push(itemAtual);
+    //inserindo um elemento dentro de um array
+
+    localStorage.setItem("itens", JSON.stringify(itens));
+    //json.stringfy -> transforma um objeto em uma string
+    //Os dados serao armazenados no navegador em forma de array, sem sobrescrever cada dado enviado pelo usuário
+
+
 
     // console.log(novoItem); //virou objeto porque somamos elementos criados no html pelo js, concatenando em uma variável;
 }
