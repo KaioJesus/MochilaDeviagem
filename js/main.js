@@ -1,59 +1,82 @@
-
-const form = document.getElementById('novoItem');
-const lista = document.getElementById("lista");
-const itens = JSON.parse(localStorage.getItem("itens")) || [];
-//se tiver algum item, ele vai até o dado armazenado e pega e joga para página ou vai criar um array vazio;
+const form = document.getElementById("novoItem")
+const lista = document.getElementById("lista")
+const itens = JSON.parse(localStorage.getItem("itens")) || []
 
 itens.forEach( (elemento) => {
-    criaElemento(elemento);
-})
+    criaElemento(elemento)
+} )
 
 form.addEventListener("submit", (evento) => {
-    evento.preventDefault();
-    // Formuário envia os dados para algum lugar, nesse caso envia para a própria página. Preciso interromper esse comportamento, então para isso, chamao o método utilizado acima;
+    evento.preventDefault()
 
-    const nome = evento.target.elements['nome'];
-    const  quantidade = evento.target.elements['quantidade'];
+    const nome = evento.target.elements['nome']
+    const quantidade = evento.target.elements['quantidade']
+
+    const existe = itens.find( elemento => elemento.nome === nome.value )
 
     const itemAtual = {
         "nome": nome.value,
         "quantidade": quantidade.value
     }
 
-    criaElemento(itemAtual);
+    if (existe) {
+        itemAtual.id = existe.id
 
-    nome.value = "";
-    quantidade.value = "";
-    // toda vez que enviar o formulario, apagar os dados escritos anteriormente
+        atualizaElemento(itemAtual)
+//Refatoração da condicional if else, atualizando um id para cada item
+        itens[itens.findIndex(elemento => elemento.id === existe.id)] = itemAtual
+    } else {
+        itemAtual.id = itens[itens.length -1] ? (itens[itens.length-1]).id + 1 : 0;
 
-    
+        criaElemento(itemAtual)
 
-    itens.push(itemAtual);
-    //inserindo um elemento dentro de um array
+        itens.push(itemAtual)
+    }
 
-    localStorage.setItem("itens", JSON.stringify(itens));
-    //json.stringfy -> transforma um objeto em uma string
-    //Os dados serao armazenados no navegador em forma de array, sem sobrescrever cada dado enviado pelo usuário
+    localStorage.setItem("itens", JSON.stringify(itens))
+
+    nome.value = ""
+    quantidade.value = ""
 })
 
-//validando formulário
+function criaElemento(item) {
+    const novoItem = document.createElement("li")
+    novoItem.classList.add("item")
 
-function criaElemento(item){
-    const novoItem = document.createElement('li');
-    //criar um elemento na li
-     novoItem.classList.add("item");
-    //adicionar um item a lista na classe "item"
-    
-    const numeroItem = document.createElement('strong');
-    numeroItem.innerHTML = item.quantidade;
-    //criar um elemento que adiciona a quantidade que deseja na tag strong
+    const numeroItem = document.createElement("strong")
+    numeroItem.innerHTML = item.quantidade
+    numeroItem.dataset.id = item.id
+    novoItem.appendChild(numeroItem)
 
-    novoItem.appendChild(numeroItem);
-    //para resolver o problema do objeto, insere um elemento criado dentro do outro; nesse caso o numeroItem vai entrar dentro do novo item
-    novoItem.innerHTML += item.nome;
-    //Recebe a quantidade e o nome
+    novoItem.innerHTML += item.nome
 
-    lista.appendChild(novoItem);
+    novoItem.appendChild(botaoDeleta(item.id)) // Referenciar a função botaoDeleta no nó da função principal
 
-    // console.log(novoItem); //virou objeto porque somamos elementos criados no html pelo js, concatenando em uma variável;
+    lista.appendChild(novoItem)
+}
+
+function atualizaElemento(item) {
+    document.querySelector("[data-id='"+item.id+"']").innerHTML = item.quantidade
+}
+
+//Função para criar botão com evento de click nos itens, e retornar os itens clicados
+function botaoDeleta(id) {
+    const elementoBotao = document.createElement("button")
+    elementoBotao.innerText = "X"
+
+    elementoBotao.addEventListener("click", function() {
+        deletaElemento(this.parentNode, id)
+    })
+
+    return elementoBotao
+}
+
+//Função para deletar os itens enviados da função botaoDeleta no array de itens e no navegador
+
+function deletaElemento(tag, id) { 
+    tag.remove()
+
+    itens.splice(itens.findIndex(elemento => elemento.id === id), 1)
+
+    localStorage.setItem("itens", JSON.stringify(itens))
 }
